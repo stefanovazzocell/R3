@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-// DB + cors Settings
-var db_host, db_prefix, cors_allowed string
+// DB + cors + server Settings
+var db_host, db_prefix, cors_allowed, web_port string
 
 // Rate Limit + Proxy Settings
 var rl_max_req, rl_max_ipr, rl_bigquery, rl_proxy int
@@ -15,6 +15,7 @@ var rl_max_req, rl_max_ipr, rl_bigquery, rl_proxy int
 // main - Start the server
 func main() {
 	// Get Flags
+	flag.StringVar(&web_port, "web_port", ":8080", "[App] Web Server Port")
 	flag.StringVar(&db_host, "db_host", "localhost:6379", "[Database] DB host")
 	flag.StringVar(&db_prefix, "db_prefix", "rkt:", "[Database] Entries prefix")
 	flag.StringVar(&cors_allowed, "cors_allowed", "http://localhost", "[CORS] Allowed domain(s)")
@@ -32,7 +33,7 @@ func main() {
 	pool = newPool(db_host)
 	router := NewRouter()
 	log.Println("Listening...")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(web_port, router))
 }
 
 // HandleError - Handles unexpected errors
