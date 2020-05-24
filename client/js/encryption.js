@@ -8,7 +8,7 @@
 */
 async function SimpleHash(password) {
   // Prepare
-  const full = await HashString(password, 1);
+  const full = await HashString(password, PRE_HASH_ROUNDS);
   // Take ~ Half
   const half = full.substring(0, Math.round(full.indexOf('=')/2));
   // Hash
