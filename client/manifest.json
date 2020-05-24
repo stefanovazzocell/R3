@@ -1,0 +1,25 @@
+{
+  "short_name": "R3",
+  "name": "R3 - Encrypted Sharing",
+  "description": "Create and share encrypted links, messages, and more",
+  "icons": [
+    {
+      "src": "/img/icon_512.png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/img/icon_192.png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32"
+    }
+  ],
+  "orientation": "portrait",
+  "start_url": "/",
+  "background_color": "#011f4b",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#005b96"
+}

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#005b96">
+    <meta name="msapplication-navbutton-color" content="#005b96">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#005b96">
+    <link rel="apple-touch-icon" href="/img/icon_192.png">
+    <link rel="manifest" href="/manifest.json">
+    <title>R3 - 🚀 Encrypted Sharing</title>
+    <link rel="stylesheet" href="css/master.css">
+  </head>
+  <body>
+    <div id="header">
+      <div class="inner">
+          <a href="/">
+            <span class="title">R<sup>3</sup></span>
+            <span class="subtitle">🚀 Encrypted Sharing</span>
+          </a>
+      </div>
+    </div>
+    <div id="app">
+      <div id="container_id" class="space default hide">
+        <label for="id_input">Your ID</label>
+        <input id="id_input" class="sidecar mono" type="text" pattern=".{3,}" name="id_input" placeholder="choose a secure ID" autocomplete="off" required>
+        <div id="btn_generate" class="btn sidecar">&#8635;</div>
+      </div>
+      <div id="container_shared" class="default hide">
+        <div class="tab_group" data-tgroup="userdata">
+          <div class="tab active default" data-target="tab_link"><span>🔗</span><span>Link</span></div>
+          <div class="tab" data-target="tab_message"><span>📝</span><span>Message</span></div>
+          <div class="tab" data-target="tab_image"><span>🖼️</span><span>Image</span></div>
+          <div class="tab" data-target="tab_file"><span>🗂️</span><span>File</span></div>
+        </div>
+        <div id="tab_link" class="tab_content" data-group="userdata">
+          <label for="link_data_input">Your Link</label>
+          <input id="link_data_input" type="url" pattern="^((http(s)?)|((s)?ftp)):\/\/(.)*" min="7" maxlength="10000" name="link_data_input" placeholder="paste your link here" autocomplete="off" required>
+        </div>
+        <div id="tab_message" class="tab_content hide" data-group="userdata">
+          <label for="message_data_input">Your Message</label>
+          <textarea id="message_data_input" maxlength="1500000" name="message_data_input" placeholder="write your message here" rows="4" cols="80" autocomplete="false" required></textarea>
+        </div>
+        <div id="tab_image" class="tab_content hide" data-group="userdata">
+          <img id="image_preview" class="hide" src="" alt="Image Preview">
+          <label for="image_data_input">Your Image - <span class="size">0</span>/1.5 MB<span class="tune"></span></label>
+          <input id="image_data_input" type="file" name="image_data_input" autocomplete="off" accept="image/*" required>
+        </div>
+        <div id="tab_file" class="tab_content hide" data-group="userdata">
+          <label for="file_data_input">Your File - <span class="size">0</span>/1.5 MB</label>
+          <input id="file_data_input" type="file" name="file_data_input" autocomplete="off" required>
+        </div>
+      </div>
+      <div id="container_settings" class="space default hide">
+        <div id="settings_time" class="tab_group pills solid">
+          <div class="tab active default" data-value="10"><span>10</span><span>min</span></div>
+          <div class="tab high" data-value="30"><span>30</span><span>min</span></div>
+          <div class="tab high" data-value="60"><span>1</span><span>hour</span></div>
+          <div class="tab high" data-value="1440"><span>1</span><span>day</span></div>
+          <div class="tab high" data-value="10080"><span>1</span><span>week</span></div>
+          <div class="tab high" data-value="40320"><span>1</span><span>month</span></div>
+        </div>
+        <div id="settings_views" class="tab_group pills solid space">
+          <div class="tab" data-value="1"><span>1</span><span>views</span></div>
+          <div class="tab active default" data-value="5"><span>5</span><span>views</span></div>
+          <div class="tab" data-value="10"><span>10</span><span>views</span></div>
+          <div class="tab" data-value="100"><span>100</span><span>views</span></div>
+          <div class="tab" data-value="1000"><span>1k</span><span>views</span></div>
+          <div class="tab" data-value="10000"><span>10k</span><span>views</span></div>
+        </div>
+        <div id="btn_create" class="btn block">Create</div>
+        <div id="loader" class="loader hide"><div class="bar"></div><div class="message"></div></div>
+      </div>
+      <div id="container_view" class="hide">
+        <div id="accept_view">
+          <div class="text_notice">
+            <p>Someone shared <span id="view_share_type">a share</span> with you.</p>
+            <p>Accept it <b>only</b> if you trust the person who sent you the link, this service has no insights into what this share contains and it could be dangerous.</p>
+          </div>
+          <div id="btn_accept_share" class="btn block">I trust this share, load it</div>
+          <div id="btn_cancel_share" class="btn block btn_reset">Cancel</div>
+        </div>
+        <div id="data_view" class="hide">
+          <div id="view_link" class="tab_content hide">
+            <input id="link_view" type="url" pattern="^((http(s)?)|((s)?ftp)):\/\/(.)*" min="7" maxlength="10000" name="link_data_input" placeholder="paste your link here" autocomplete="off" required>
+            <a id="btn_dl_img" class="btn block" rel="noreferrer" href="#">Open Link</a>
+            <div class="btn block btn_copy" data-target="link_view">Copy Link</div>
+          </div>
+          <div id="view_message" class="tab_content hide">
+            <textarea id="message_view" maxlength="1500000" name="message_data_input" placeholder="write your message here" rows="4" cols="80" autocomplete="false" required readonly></textarea>
+            <div class="btn block btn_copy" data-target="message_view">Copy Message</div>
+          </div>
+          <div id="view_image" class="tab_content hide">
+            <div id="sample_image_preview" class="hide">
+              <img class="image_preview" src="" alt="Share Image">
+              <div class="btn block" data-blob="">Download Image</div>
+            </div>
+          </div>
+          <div id="view_file" class="hide"><div id="sample_btn_dl_file" class="btn block hide">Download "<span></span>"</div></div>
+        </div>
+      </div>
+      <div id="container_error" class="hide">
+        <div>
+          <div class="text_notice">
+            <p id="view_error_message"></p>
+          </div>
+          <div class="btn block btn_reset">OK</div>
+        </div>
+      </div>
+      <div id="container_final" class="hide">
+        <div>
+          <label for="id_link">Your Link</label>
+          <input id="id_link" class="sidecar mono" type="url" name="id_link" autocomplete="off" readonly>
+          <div id="btn_copy_link" class="btn_copy btn sidecar" data-target="id_link">&#x1f4cb;</div>
+          <div id="btn_back" class="btn block btn_reset">Back</div>
+        </div>
+      </div>
+      <div id="container_loader">
+        <div class="loader"><div class="bar"></div><div class="message">Loading...</div></div>
+      </div>
+    </div>
+    <div id="alerts">
+      <div id="sample" class="alert"><div class="msg"></div><div class="small">Tap to dismiss</div></div>
+    </div>
+    <div id="footer">
+      <a href="privacy.html" target="_blank">Privacy</a> &#8226; <a href="terms.html" target="_blank">Terms</a> &#8226; <a href="changelog.html" target="_blank">Changelog</a>
+    </div>
+    <script src="js/settings.js" charset="utf-8"></script>
+    <script src="js/utils.js" charset="utf-8"></script>
+    <script src="js/encryption.js" charset="utf-8"></script>
+    <script src="js/api.js" charset="utf-8"></script>
+    <script src="js/ui.js" charset="utf-8"></script>
+    <script src="js/core.js" charset="utf-8"></script>
+  </body>
+</html>
