@@ -1,0 +1,4 @@
+Contact: https://stefanovazzoler.com/#contact
+Preferred-Languages: English
+Canonical: https://rkt.one/security.txt
+Policy: https://rkt.one/terms.html
