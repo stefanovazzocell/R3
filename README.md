@@ -10,6 +10,8 @@ This is a personal project and a beta product. The encryption was written by me 
 
 I spent countless hours doing research on how to securely implement this system but I am by no means qualified to certify their safety. I will commit to ask others with more experience to review the logic behind the encryption.
 
+The server code and front end code also needs more testing and refactoring; this is a beta personal project made for fun.
+
 ## Idea
 
 A few years back when I created the first version of Rocket I wanted to make a URL Shortener that was fast and that I could host myself. At the time I was concerned with abuse of the service and liability regarding what people would share through it. I was also letting my friends and family use it and I wanted to provide them a reasonable expectation of privacy. Although none of those worries became a reality but at the time I added some encryption based on the shortened link to sleep better at night. This was back in 2015-2016.
