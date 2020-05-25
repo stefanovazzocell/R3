@@ -9,10 +9,10 @@
 async function SimpleHash(password) {
   // Prepare
   const full = await HashString(password, PRE_HASH_ROUNDS);
-  // Take ~ Half
-  const half = full.substring(0, Math.round(full.indexOf('=')/2));
+  // Take ~ 8 characters (64^8 possibilities)
+  const partial_hash = full.substring(0, 8);
   // Hash
-  return await HashString(half, HASH_ROUNDS);
+  return await HashString(partial_hash, HASH_ROUNDS);
 }
 
 /*
