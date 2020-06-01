@@ -32,6 +32,6 @@ No external libraries are used for the encryption - and at the time of writing t
 
 **Encryption**
 
-![A diagram of the encryption R3 uses][img/img/R3_encrypt_diagram.png]
+![A diagram of the encryption R3 uses][img/R3_encrypt_diagram.png]
 
-[View PNG](img/img/R3_encrypt_diagram.png) - [View SVG](img/img/R3_encrypt_diagram.svg)
+[View PNG](img/R3_encrypt_diagram.png) - [View SVG](img/R3_encrypt_diagram.svg)
