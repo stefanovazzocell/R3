@@ -4,7 +4,7 @@ Share links, messages, images and files securely with client side encryption in 
 
 This is the successor to [Rocket](https://github.com/stefanovazzocell/Rocket) and [LaunchPad](https://github.com/stefanovazzocell/LaunchPad).
 
-Read about the [threat model](docs/ThreatModel) or catch up with the [definitions](docs/Definitions) in our docs.
+Read about the [threat model](https://stefanovazzocell.github.io/R3/docs/ThreatModel) and [encryption](https://stefanovazzocell.github.io/R3/docs/Encryption) or catch up with the [definitions](https://stefanovazzocell.github.io/R3/docs/Definitions) in our docs.
 
 ## Disclaimer
 

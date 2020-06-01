@@ -2,7 +2,7 @@
 
 Last Updated: May 24th, 2020.
 
-Important definition at [Definitions.md](Definitions).
+Important definition in [this document](Definitions).
 
 R3 is designed to protect users and users' content against a range of threats, but there is no such thing as perfect security. In this document we will describe the treat model that R3 aims to follow in its design.
 

@@ -2,9 +2,9 @@
 
 Last Updated: May 31st, 2020.
 
-Important definition at [Definitions.md](Definitions).
+Important definition in [this document](Definitions).
 
-Read more about what R3 is supposed to defend against in the [ThreatModel.md](Thread Model) document.
+Read more about what R3 is supposed to defend against in the [Threat Model](ThreadModel) document.
 
 Note that, despite our best efforts, it's impossible to guarantee perfect security. The code might contain bugs and design issues that make it vulnerable to attacks; if you're aware of any please [contact me](https://stefanovazzoler.com/#contact).
 
