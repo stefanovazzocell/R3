@@ -114,19 +114,6 @@ onReady(()=>{
     show('#data_view');
     document.getElementById('view_share_id').innerText = ''; // Clear share ID
     let parent;
-    const downloadFn = (e)=>{
-      const initial_text = e.target.innerText;
-      e.target.innerText = 'Please wait...'
-      const a = document.createElement("a");
-      document.body.appendChild(a);
-      a.download = e.target.dataset.name;
-      a.ref = 'noopener';
-      fetch(e.target.dataset.blob).then(res => res.blob()).then((b)=>{
-        a.href = URL.createObjectURL(b);
-        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); e.target.innerText = initial_text; }, 1E4);
-        setTimeout(function () { a.click(); e.target.innerText = 'Downloading'; }, 0);
-      });
-    }
     switch (view_share.t) {
       case 'l':
         setInput('link_view', view_share.d);
@@ -149,11 +136,10 @@ onReady(()=>{
             newimg.id = '';
             newimg.classList.remove('hide');
             newimg.children[0].src = i;
-            newimg.children[1].dataset.blob = i;
+            newimg.children[1].href = i;
             let it = i.substring(11,i.indexOf(';'));
             if (it === 'jpeg') it = 'jpg';
-            newimg.children[1].dataset.name = `image.${it}`;
-            newimg.onclick = downloadFn;
+            newimg.children[1].download = `image.${it}`;
             parent.appendChild(newimg);
           } else errorFn();
         });
@@ -166,10 +152,9 @@ onReady(()=>{
             const newfile = document.getElementById('sample_btn_dl_file').cloneNode(true);
             newfile.id = '';
             newfile.classList.remove('hide');
-            newfile.dataset.blob = f.d;
-            newfile.dataset.name = f.n;
+            newfile.href = f.d;
+            newfile.download = f.n;
             newfile.children[0].innerText = f.n.substring(0,20) + (f.n.length > 20 ? '...' : '');
-            newfile.onclick = downloadFn;
             parent.appendChild(newfile);
           } else errorFn();
         });
@@ -254,7 +239,7 @@ onReady(()=>{
   if (window.location.hash && window.location.hash.length > 1) {
     const hash = window.location.hash.substring(1);
     log('Found a share hash');
-    document.getElementById('view_share_id').innerText = hash;
+    document.getElementById('view_share_id').innerText = hash.substring(0,40) + (hash.length > 40 ? '...' : '');
     GetLinkUI(hash).then((e)=>{
       const errorFn = () => {
         document.getElementById('view_error_message').innerText = 'Unsupported Share';
