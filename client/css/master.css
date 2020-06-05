@@ -85,7 +85,7 @@ body {
 #tab_file {
   border-top-left-radius: 4px;
 }
-#tab_image, #tab_message {
+#tab_image, #tab_message, .tab_round {
   border-radius: 4px;
 }
 
