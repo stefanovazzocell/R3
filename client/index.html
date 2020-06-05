@@ -74,8 +74,9 @@
       <div id="container_view" class="hide">
         <div id="accept_view">
           <div class="text_notice">
-            <p>Someone shared <span id="view_share_type">a share</span> with you.</p>
+            <p>Someone shared <b id="view_share_type">a share</b> with you.</p>
             <p>Accept it <b>only</b> if you trust the person who sent you the link, this service has no insights into what this share contains and it could be dangerous.</p>
+            <p><small>Share ID: <b id="view_share_id"></b></small></p>
           </div>
           <div id="btn_accept_share" class="btn block">I trust this share, load it</div>
           <div id="btn_cancel_share" class="btn block btn_reset">Cancel</div>
@@ -83,7 +84,7 @@
         <div id="data_view" class="hide">
           <div id="view_link" class="tab_content hide">
             <input id="link_view" type="url" pattern="^((http(s)?)|((s)?ftp)):\/\/(.)*" min="7" maxlength="10000" name="link_data_input" placeholder="paste your link here" autocomplete="off" required>
-            <a id="btn_dl_img" class="btn block" rel="noreferrer" href="#">Open Link</a>
+            <a id="link_view_open" class="btn block" rel="noreferrer" href="#">Open Link</a>
             <div class="btn block btn_copy" data-target="link_view">Copy Link</div>
           </div>
           <div id="view_message" class="tab_content hide">

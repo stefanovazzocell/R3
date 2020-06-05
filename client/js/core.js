@@ -112,6 +112,7 @@ onReady(()=>{
     }
     hide('#accept_view');
     show('#data_view');
+    document.getElementById('view_share_id').innerText = ''; // Clear share ID
     let parent;
     const downloadFn = (e)=>{
       const initial_text = e.target.innerText;
@@ -130,6 +131,7 @@ onReady(()=>{
       case 'l':
         setInput('link_view', view_share.d);
         if (checkInput('link_view')) {
+          document.getElementById('link_view_open').href = view_share.d;
           show('#view_link');
         } else errorFn();
         break;
@@ -251,7 +253,8 @@ onReady(()=>{
 
   if (window.location.hash && window.location.hash.length > 1) {
     const hash = window.location.hash.substring(1);
-    log(`Found hash '${hash}'`);
+    log('Found a share hash');
+    document.getElementById('view_share_id').innerText = hash;
     GetLinkUI(hash).then((e)=>{
       const errorFn = () => {
         document.getElementById('view_error_message').innerText = 'Unsupported Share';
@@ -288,6 +291,7 @@ onReady(()=>{
         document.getElementById('view_share_type').innerText = stype;
         hide('#container_loader');
         show('#container_view');
+        window.history.replaceState( {} , 'R3', '/' ); // Remove URL from history
       } else {
         // Error
         hide('#container_loader');
