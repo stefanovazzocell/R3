@@ -26,7 +26,16 @@ R3 aims to provide a reasonably secure and private way to share small pieces of 
 
 ## Changes
 
-### Since V2
+The current version is v3.0.1
+
+### Since v3.0.0
+
+- Fixed "Open Link" button not working on link shares.
+- Improved privacy/security by deleting the ShareID from the browser history.
+- Simpler and much faster handling of images/files download.
+- Minor UI tweaks.
+
+### Since v2
 
 Uses the [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API) for faster encryption in modern browsers which in turn allows me to perform 5x more rounds of hashing with PBKDF2 and SHA512 compared to the previous version. It also allowed me to write my encryption scheme using lower level primitives.
 
