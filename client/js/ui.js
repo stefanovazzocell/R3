@@ -132,7 +132,7 @@ function generate_random_id() {
   const id_input = document.getElementById('id_input');
   const link = document.getElementById('id_link');
   id_input.value = randomKey();
-  link.value = `https://${window.location.hostname}/#${id_input.value}`
+  link.value = `${window.location.protocol}//${window.location.hostname}/#${id_input.value}`
 }
 
 /*
