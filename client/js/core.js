@@ -27,7 +27,7 @@ onReady(()=>{
       }
       el.classList.add('active');
       if (el.dataset.target && el.parentElement.dataset.tgroup) {
-        if (el.dataset.target === 'tab_image') promptCanvas();
+        if (el.dataset.target === 'tab_image' && !checkCanvas()) log('Canvas data access denied: randomization detected');
         selectAll(`div[data-group="${el.parentElement.dataset.tgroup}"]`, (t)=>{ t.classList.add('hide'); });
         document.getElementById(el.dataset.target).classList.remove('hide');
         ui_big_query_watch();

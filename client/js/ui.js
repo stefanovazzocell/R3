@@ -261,6 +261,7 @@ async function GetLinkUI(share_id) {
 async function compressImage(data) {
   const start_size = data.length;
   return new Promise((resolve, reject)=>{
+    if (!checkCanvas()) reject('Image too large; please allow canvas access or choose a smaller image.');
     const img = new Image();
     let count = 0;
     img.onload=()=>{
@@ -302,12 +303,13 @@ async function compressImage(data) {
 }
 
 /*
-* promptCanvas() - Prompts for Canvas access on Firefox
+* checkCanvas() - Prompts for Canvas access on Firefox
+*
+* @returns {bool}, true if Canvas working, false otherwise
 */
-function promptCanvas() {
-  log('Prompting for canvas access');
+function checkCanvas() {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   canvas.height = 10; canvas.width = 10;
-  canvas.toDataURL('image/jpeg', 0.5);
+  return (canvas.toDataURL('image/jpeg', 1) === canvas.toDataURL('image/jpeg', 1));
 }
