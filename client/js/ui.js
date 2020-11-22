@@ -271,32 +271,39 @@ async function compressImage(data) {
       let width = img.width; canvas.width = width;
       let height = img.height; canvas.height = height;
       let cur_data = '';
-      let m = 1;
-      const tuner = (min, max, q) => {
-        count++;
-        if (count > 20) {
-          reject('Unable to compress the image.');
-          return;
-        }
-        m = min + (max - min) / 2;
+      let force_done = false;
+      const best = { data: '', size: -1, q: -1, m: -1 }
+      const tuner = (min, max, m, q) => {
         ctx.clearRect(0, 0, width, height);
         canvas.width = width * m;
         canvas.height = height * m;
         ctx.drawImage(img, 0, 0, width * m, height * m);
         cur_data = canvas.toDataURL('image/jpeg', q);
-        if (1000000 <= cur_data.length && cur_data.length <= 1200000) {
-          const t1 = performance.now();
-          resolve(cur_data);
-          log(`[perf] Compression ${t1-t0}ms, ${Math.round(q*100)}% quality, ${Math.round(m*100)}% size, ${Math.round(start_size / (1024 * 1024))}->${Math.round(cur_data.length / (1024 * 1024))}Mb (${Math.round(100*cur_data.length/start_size)}%).`);
+        if (cur_data.length <= 1200000 && cur_data.length > best.size) {
+          if (m === max) force_done = true;
+          best.data = cur_data;
+          best.size = cur_data.length;
+          best.q = q;
+          best.m = m;
+        }
+        if (++count > 10 || force_done || (best.size >= 1000000 && best.size <= 1200000)) {
+          if (best.size < 1 || best.size > 1200000) {
+            reject('Unable to compress the image.');
+          } else {
+            const t1 = performance.now();
+            resolve(best.data);
+            log(`[perf] Compression ${t1-t0}ms, count at ${count}, ${Math.round(best.q*100)}% quality, ${Math.round(best.m*100)}% size, ${(start_size / (1024 * 1024)).toFixed(1)}->${(best.size / (1024 * 1024)).toFixed(1)}Mb (${Math.round(100*best.size/start_size)}%).`);
+          }
           return;
         }
-        if (cur_data.length < 1000000) { min = m; }
-        if (1200000 < cur_data.length) { q = Math.max(0.3, q - 0.05); max = m; }
-        percentage(10 + Math.min(Math.abs((cur_data.length - 1200000) / (start_size - 1200000)), 1) * 90, 'Tuning the image, please wait...');
-        setTimeout(()=>{ tuner(min, max, q); }, 5);
+        m = +(min + (max - min) * 0.8).toFixed(2);
+        if (cur_data.length <= 1200000) { min = m; }
+        if (cur_data.length > 1200000) { q = Math.max(0.3, q - 0.05); max = m; }
+        percentage(10 + (count / 10) * 90, 'Tuning the image, please wait...');
+        setTimeout(()=>{ tuner(min, max, +(min + (max - min) * 0.8).toFixed(2), q); }, 5);
       }
       percentage(10, 'Tuning the image, please wait...');
-      setTimeout(()=>{ tuner(0.05, 1, 0.8); }, 5);
+      setTimeout(()=>{ tuner(0.01, 1, 1, 0.95); }, 5);
     }
     img.src = data;
   });
