@@ -232,7 +232,7 @@ onReady(()=>{
   }
 
   if (crypto.subtle === undefined) {
-    error('Sorry, this browser is not supported. Please download the latest version of Firefox or Chrome.');
+    error('Sorry, this browser does not support web cryptography. Please download the latest version of Firefox or Chrome.');
     document.getElementById('btn_create').classList.add('disabled');
   }
 
