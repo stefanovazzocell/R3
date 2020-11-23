@@ -92,6 +92,7 @@ async function fileReader(input) {
   return new Promise((resolve)=>{
     const reader = new FileReader();
     reader.onload = (e) => {
+      document.test_e = e;
       resolve(e.target.result);
     }
     reader.readAsDataURL(document.getElementById(input).files[0]);
@@ -287,7 +288,7 @@ async function compressImage(data) {
           best.m = m;
         }
         if (++count > 10 || force_done || (best.size >= 1000000 && best.size <= 1200000)) {
-          if (best.size < 1 || best.size > 1200000) {
+          if (best.size <= 6 || best.size > 1200000) {
             reject('Unable to compress the image.');
           } else {
             const t1 = performance.now();
@@ -306,6 +307,13 @@ async function compressImage(data) {
       setTimeout(()=>{ tuner(0.01, 1, 1, 0.95); }, 5);
     }
     img.src = data;
+    try {
+      img.decode().catch((encodingError) => {
+        reject('Image unsupported by your browser.');
+      });
+    } catch (e) {
+      log('No img.decode() support');
+    }
   });
 }
 
