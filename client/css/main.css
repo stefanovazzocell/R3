@@ -368,72 +368,69 @@ div.btn.sidecar {
 
 /* Colors */
 
-body {
-  background-color: #b3cde0;
-}
-a, #header, #footer, .tab, #container_fulltext, .text_notice {
-  color: #011f4b;
-}
-.loader, .tab.active, .tab_content, .btn {
-  color: #fff;
-}
-input:invalid, textarea:invalid, .alert {
-  background-color: #fee;
-  color: #e33;
-}
-.loader, .btn:active  {
-  background-color: #011f4b;
-}
-.loader > .bar, .tab.active, .tab_content, .btn {
-  background-color: #005b96;
-}
-.tab:not(.disabled):not(.active):hover, #container_fulltext, .text_notice {
-  background-color: #6497b1;
-}
-.tab.disabled {
-  background-color: #d9dee1;
-}
-.btn:hover {
-  background-color: #03396c;
+:root {
+  --bg: #b3cde0;
+  --accent: #011f4b;
+  --error-bg: #fee;
+  --error-cl: #e33;
+  --hover: #03396c;
+  --tab-hover: #6497b1;
 }
 
 @media (prefers-color-scheme: dark) {
-  body {
-    background-color: #011f4b;
+  :root {
+    --bg: #011f4b;
+    --accent: #b3cde0;
+    --error-bg: #fee;
+    --error-cl: #e33;
+    --hover: #6497b1;
+    --tab-hover: #03396c;
   }
-  a, #header, #footer, .tab {
-    color: #b3cde0;
-  }
-  .loader, .tab.active, .tab_content, .btn, label, #container_fulltext, .text_notice {
+  label, #container_fulltext, .text_notice {
     color: #fff;
   }
   input, textarea {
     background-color: #bbb;
   }
-  input:invalid, textarea:invalid, .alert {
-    background-color: #700;
-    color: #b3cde0;
-  }
-  .loader, .btn:active  {
-    background-color: #b3cde0;
-  }
-  .btn:active {
-    color: #011f4b;
-  }
-  .loader > .bar, .tab.active, .tab_content, .btn, #container_fulltext {
+  #container_fulltext {
     background-color: #005b96;
+  }
+  .tab.disabled {
+    opacity: 0.4;
   }
   .tab.disabled {
     color: #000;
   }
-  .tab:not(.disabled):not(.active):hover, .text_notice {
-    background-color: #03396c;
+  .btn:active {
+    color: #011f4b;
   }
-  .tab.disabled {
-    background-color: #d9dee1;
-    opacity: 0.4;
-  }
-  .btn:hover {
-    background-color: #6497b1;
-  }
+}
+
+body {
+  background-color: var(--bg);
+}
+a, #header, #footer, .tab, #container_fulltext, .text_notice {
+  color: var(--accent);
+}
+.loader, .tab.active, .tab_content, .btn {
+  color: #fff;
+}
+input:invalid, textarea:invalid, .alert {
+  background-color: var(--error-bg);
+  color: var(--error-cl);
+}
+.loader, .btn:active  {
+  background-color: var(--accent);
+}
+.loader > .bar, .tab.active, .tab_content, .btn {
+  background-color: #005b96;
+}
+.tab:not(.disabled):not(.active):hover, .text_notice, #container_fulltext {
+  background-color: var(--tab-hover);
+}
+.tab.disabled {
+  background-color: #d9dee1;
+}
+.btn:hover {
+  background-color: var(--hover);
 }
