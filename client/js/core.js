@@ -4,6 +4,12 @@ let view_share;
 
 // Page Setup
 onReady(()=>{
+  // Helpers
+  window.fileEl = document.getElementById('input-file');
+  window.imageEl = document.getElementById('input-image');
+  window.infoEl = document.getElementById('info');
+  window.textEl = document.getElementById('input-text');
+  window.smartEl = document.getElementById('input-smart');
   // Click Listeners
   onClick('#btn_generate', generate_random_id);
   onClick('.btn_copy', (e)=>{
@@ -26,12 +32,6 @@ onReady(()=>{
         c[i].classList.remove('active');
       }
       el.classList.add('active');
-      if (el.dataset.target && el.parentElement.dataset.tgroup) {
-        if (el.dataset.target === 'tab_image' && !checkCanvas()) log('Canvas data access denied: randomization detected');
-        selectAll(`div[data-group="${el.parentElement.dataset.tgroup}"]`, (t)=>{ t.classList.add('hide'); });
-        document.getElementById(el.dataset.target).classList.remove('hide');
-        ui_big_query_watch();
-      }
     }
   });
   let is_dev = false;
@@ -164,63 +164,81 @@ onReady(()=>{
     view_share = '';
   });
 
+  // Omni
+  smartEl.addEventListener('input', (e)=>{
+    e.preventDefault();
+    if (e.type === 'input') setInputType('text', smartEl.innerText);
+    smartEl.innerText = '';
+  })
+  smartEl.addEventListener('keydown', (e)=>{
+    if (!e.ctrlKey && e.key.length === 1) {
+      e.preventDefault();
+      setInputType('text', e.key);
+    }
+    smartEl.innerText = '';
+  })
+  smartEl.addEventListener('paste', (e)=>{
+    e.preventDefault();
+    let clipboard = (e.clipboardData || window.clipboardData);
+    if (clipboard) {
+      const str_data = clipboard.getData('text');
+      if (clipboard.files.length > 0) {
+        if (clipboard.files.length > 1) error('You can only share 1 thing at the time');
+        if (clipboard.files[0].type.startsWith('image')) {
+          setInputType('image', clipboard.files[0]);
+        } else setInputType('file', clipboard.files[0]);
+      } else if (typeof str_data === 'string' && str_data.length > 0) {
+        setInputType('text', clipboard.getData('text'));
+      }
+    }
+    smartEl.innerText = '';
+  })
+  smartEl.addEventListener('dblclick', (e)=>{
+    let file_picker = document.createElement('input');
+    file_picker.setAttribute('type', 'file');
+    file_picker.onchange = (e)=>{
+      if (file_picker.files[0].type.startsWith('image')) {
+        setInputType('image', file_picker.files[0]);
+      } else setInputType('file', file_picker.files[0]);
+    }
+    file_picker.click();
+  })
+  window.addEventListener('dragover', (e)=>{
+    e.preventDefault();
+  })
+  window.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    if (document.getElementById('container_shared').classList.contains('hide')) return;
+    const str_data = e.dataTransfer.getData('text');
+    if (e.dataTransfer.files.length > 0) {
+      if (e.dataTransfer.files.length > 1) error('You can only share 1 thing at the time');
+      if (e.dataTransfer.files[0].type.startsWith('image')) {
+        setInputType('image', e.dataTransfer.files[0]);
+      } else setInputType('file', e.dataTransfer.files[0]);
+    } else if (typeof str_data === 'string' && str_data.length > 0) {
+      setInputType('text', e.dataTransfer.getData('text'));
+    }
+    smartEl.innerText = '';
+  })
+  textEl.addEventListener('blur', ()=>{
+    ui_big_query(textEl.value.length);
+    if (textEl.value === '') {
+      setInputType(); // Reset
+      return;
+    }
+    if (parseURL(textEl.value)) {
+      textEl.value = parseURL(textEl.value);
+      infoEl.innerText = 'Link';
+    } else {
+      infoEl.innerText = `Message (${(textEl.value.length / 1048576).toFixed(1)}Mb)`;
+    }
+  })
+
   // Dynamic Listeners
   document.getElementById('id_input').addEventListener('input', ()=>{
     const id_input = document.getElementById('id_input');
     const link = document.getElementById('id_link');
     link.value = `https://${window.location.hostname}/#${id_input.value}`
-  });
-  document.getElementById('message_data_input').addEventListener('input', ()=>{
-    ui_big_query_watch();
-  });
-  const ldi = 'link_data_input';
-  document.getElementById(ldi).addEventListener('change', ()=>{
-    if (!checkInput(ldi)) {
-      const orig = getInput(ldi);
-      setInput(ldi, `https://${orig}`);
-      if (!checkInput(ldi)) {
-        setInput(ldi, orig);
-      }
-    }
-  });
-  const idi = 'image_data_input';
-  document.getElementById(idi).addEventListener('input', ()=>{
-    hide('#image_preview');
-    document.getElementById(idi).parentElement.querySelector('.size').innerHTML = 0;
-    if (document.getElementById(idi).files.length === 1) fileReader(idi).then((d)=>{
-      const size = (x) => { return Math.round(x.length / (102.4 * 1024)) / 10; }
-      document.getElementById(idi).parentElement.querySelector('.size').innerHTML = size(d);
-      if (d.length > 1200000) {
-        hide('#app > div');
-        show('#container_loader');
-        percentage(0, 'Rendering the image, please wait...');
-        compressImage(d).then((data)=>{
-          document.getElementById('image_preview').src = data;
-          document.getElementById(idi).parentElement.querySelector('.tune').innerHTML = ` compressed to ${size(data)}MB`;
-          show('#image_preview');
-        }).catch((e)=>{
-          error(typeof e === 'string' ? e : 'Error compressing the image');
-          document.getElementById(idi).value = '';
-          document.getElementById(idi).parentElement.querySelector('.size').innerHTML = 0;
-        }).finally(()=>{
-          hide('#container_loader');
-          show('#app > .default');
-        });
-      } else {
-        document.getElementById('image_preview').src = d;
-        show('#image_preview');
-      }
-    });
-  });
-  const fdi = 'file_data_input';
-  document.getElementById(fdi).addEventListener('input', ()=>{
-    document.getElementById(fdi).parentElement.querySelector('.size').innerHTML = 0;
-    if (document.getElementById(fdi).files.length === 1) {
-      if (document.getElementById(fdi).files[0].size > 1500000) {
-        document.getElementById(fdi).value = '';
-        error('The file can be at most ~1.5MB');
-      } else document.getElementById(fdi).parentElement.querySelector('.size').innerHTML = Math.round(document.getElementById(fdi).files[0].size / (102.4 * 1024)) / 10;
-    }
   });
 
   window.onoffline = () => {

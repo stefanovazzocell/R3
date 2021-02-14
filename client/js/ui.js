@@ -82,20 +82,21 @@ function setInput(input, val) {
 }
 
 /*
-* fileReader(query) - Reads a file given an element id for a picker
+* fileReader(source) - Reads a file given a source
 *
-* @requires query {String} the selector for the input
+* @requires source {String} the source for the input
 *
 * @returns {Promise}
 */
-async function fileReader(input) {
-  return new Promise((resolve)=>{
+async function fileReader(source) {
+  return new Promise((resolve, reject)=>{
     const reader = new FileReader();
     reader.onload = (e) => {
       document.test_e = e;
       resolve(e.target.result);
     }
-    reader.readAsDataURL(document.getElementById(input).files[0]);
+    reader.onerror = reject;
+    reader.readAsDataURL(source);
   });
 }
 
@@ -147,14 +148,16 @@ function ui_reset() {
   hide('#container_settings > .loader, #container_loader, #container_final, #container_view, #container_error, #image_preview');
   selectAll('#app > .default, #container_settings > .tab_group', (el)=>{ el.classList.remove('disabled'); });
   show('#app > .default, #btn_create');
+  document.getElementById('input-smart').focus();
 }
 
 /*
-* ui_big_query_watch() - Watches for Bigqueries
+* ui_big_query(size) - If size is above the threshold it will limit the ttl
+*
+* @requires size {Number} the size of the data
 */
-function ui_big_query_watch() {
-  const isActive = (eid)=>{return !document.getElementById(eid).classList.contains('hide')};
-  if (isActive('tab_image') || isActive('tab_file') || document.getElementById('message_data_input').value.length > 400000) {
+function ui_big_query(size) {
+  if (size > 300000) {
     selectAll('.tab.high', (el)=>{ el.classList.add('disabled'); el.classList.remove('active'); });
     selectAll('#settings_time > .tab.default', (el)=>{ el.classList.add('active'); });
   } else {
@@ -262,7 +265,10 @@ async function GetLinkUI(share_id) {
 async function compressImage(data) {
   const start_size = data.length;
   return new Promise((resolve, reject)=>{
-    if (!checkCanvas()) reject('Image too large; please allow canvas access or choose a smaller image.');
+    if (!checkCanvas()) {
+      reject('Image too large; please allow canvas access or choose a smaller image.');
+      return;
+    }
     const img = new Image();
     let count = 0;
     img.onload=()=>{
@@ -293,7 +299,7 @@ async function compressImage(data) {
           } else {
             const t1 = performance.now();
             resolve(best.data);
-            log(`[perf] Compression ${t1-t0}ms, count at ${count}, ${Math.round(best.q*100)}% quality, ${Math.round(best.m*100)}% size, ${(start_size / (1024 * 1024)).toFixed(1)}->${(best.size / (1024 * 1024)).toFixed(1)}Mb (${Math.round(100*best.size/start_size)}%).`);
+            log(`[perf] Compression ${t1-t0}ms, count at ${count}, ${Math.round(best.q*100)}% quality, ${Math.round(best.m*100)}% size, ${(start_size / 1048576).toFixed(1)}->${(best.size / 1048576).toFixed(1)}MB (${Math.round(100*best.size/start_size)}%).`);
           }
           return;
         }
@@ -307,13 +313,6 @@ async function compressImage(data) {
       setTimeout(()=>{ tuner(0.01, 1, 1, 0.95); }, 5);
     }
     img.src = data;
-    try {
-      img.decode().catch((encodingError) => {
-        reject('Image unsupported by your browser.');
-      });
-    } catch (e) {
-      log('No img.decode() support');
-    }
   });
 }
 
@@ -327,4 +326,136 @@ function checkCanvas() {
   const ctx = canvas.getContext('2d');
   canvas.height = 10; canvas.width = 10;
   return (canvas.toDataURL('image/jpeg', 1) === canvas.toDataURL('image/jpeg', 1));
+}
+
+/*
+* setInputType(type, data) - Sets the input type
+*
+* @requires type {String} the selector for the input ('text', 'image', 'file')
+* @requires data {String} the initial data (text or a file address)
+*/
+function setInputType(type, data) {
+  const MAX_LENGTH = 1200000;
+  // Reset
+  hide('#omni > *:not(.base):not(#input-smart)');
+  imageEl.src = '';
+  fileEl.innerText = '';
+  fileEl.dataset.value = '';
+  fileEl.dataset.name = '';
+  infoEl.innerText = 'Waiting...';
+  ui_big_query(0);
+  setInput('input-text', '');
+  switch (type) {
+    case 'image':
+      percentage(0, 'Loading your image, please wait...');
+      hide('#app > div');
+      show('#container_loader');
+      fileReader(data).then((d)=>{
+        imageEl.src = d;
+        imageEl.decode().then(()=>{
+          if (d.length > MAX_LENGTH) {
+            imageEl.src = '';
+            const compressFn = () => {
+              compressImage(d).then((img_data)=>{
+                imageEl.src = img_data;
+                ui_big_query(img_data.length);
+                infoEl.innerText = `Image (${(d.length / 1048576).toFixed(1)}MB compressed  to ${(img_data.length / 1048576).toFixed(1)}MB)`;
+                show('#input-image');
+              }).catch((e)=>{
+                error(typeof e === 'string' ? e : 'Error compressing the image');
+              }).finally(()=>{
+                hide('#container_loader');
+                show('#app > .default');
+              });
+            }
+            if (checkCanvas()) {
+              compressFn();
+            } else {
+              error('Please allow canvas access');
+              percentage(5, 'Waiting for canvas access...');
+              setTimeout(compressFn, 8000);
+            }
+          } else {
+            infoEl.innerText = `Image (${(d.length / 1048576).toFixed(1)}MB)`;
+            ui_big_query(d.length);
+            show('#input-image');
+            hide('#container_loader');
+            show('#app > .default');
+          }
+        }).catch(()=>{
+          error('Image unsupported by your browser.');
+          hide('#container_loader');
+          show('#app > .default');
+        });
+      }).catch((e)=>{
+        error('Unable to load image');
+        log(e);
+        hide('#container_loader');
+        show('#app > .default');
+      });
+      break;
+    case 'file':
+      percentage(0, 'Loading your file, please wait...');
+      hide('#app > div');
+      show('#container_loader');
+      fileReader(data).then((d)=>{
+        if (d.length > MAX_LENGTH) {
+          error('This file is too large');
+          hide('#container_loader');
+          show('#app > .default');
+        } else {
+          ui_big_query(d.length);
+          fileEl.innerText = data.name;
+          fileEl.dataset.value = d;
+          fileEl.dataset.name = data.name;
+          infoEl.innerText = `File (${(d.length / 1048576).toFixed(1)}MB)`;
+          show('#input-file');
+          hide('#container_loader');
+          show('#app > .default');
+        }
+      }).catch((e)=>{
+        error('Unable to load file');
+        log(e);
+        hide('#container_loader');
+        show('#app > .default');
+      });
+      break;
+    case 'text':
+      let url = parseURL(data);
+      if (url) {
+        textEl.value = url;
+        infoEl.innerText = 'Link';
+      } else {
+        textEl.value = data;
+        infoEl.innerText = `Message (${(data.length / 1048576).toFixed(1)}MB)`;
+      }
+      ui_big_query(textEl.value.length);
+      show('#input-text');
+      textEl.focus();
+      break;
+    default:
+      // Nothing to do
+      document.getElementById('input-smart').focus();
+  }
+}
+
+
+/*
+* parseURL(text) - Attempts to parse a URL
+*
+* @requires text {String} the text to parse
+*
+* @returns {String|false} the parsed url or false
+*/
+function parseURL(text) {
+  if (text > 1000 || text < 5) return false;
+  let matches = /^(((http(s)?)|((s)?ftp)):\/\/(.)*)\n*$/g.exec(text);
+  if (matches && matches.length > 0) {
+    return matches[1];
+  }
+  matches = /^([\w\.\-\_]{1,}\.\w{1,}(:[0-9]{1,5})?(\/[^\s\n]*)?)$/g.exec(text);
+  if (matches && matches.length > 0) {
+    return `https://${matches[1]}`;
+  }
+  return false;
 }

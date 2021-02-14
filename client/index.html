@@ -27,29 +27,14 @@
         <div id="btn_generate" class="btn sidecar">&#8635;</div>
       </div>
       <div id="container_shared" class="default hide">
-        <div class="tab_group" data-tgroup="userdata">
-          <div class="tab active default" data-target="tab_link"><span>🔗</span><span>Link</span></div>
-          <div class="tab" data-target="tab_message"><span>📝</span><span>Message</span></div>
-          <div class="tab" data-target="tab_image"><span>🖼️</span><span>Image</span></div>
-          <div class="tab" data-target="tab_file"><span>🗂️</span><span>File</span></div>
+        <div id="omni">
+          <div class="base">Paste or drop your share</div>
+          <div id="input-file" class="hide" data-value="" data-name=""></div>
+          <img id="input-image" class="hide" src="" alt="The image uploaded by the user">
+          <div id="input-smart" contenteditable="true"></div>
+          <textarea id="input-text" class="hide" value="" maxlength="1200000"></textarea>
         </div>
-        <div id="tab_link" class="tab_content" data-group="userdata">
-          <label for="link_data_input">Your Link</label>
-          <input id="link_data_input" type="url" pattern="^((http(s)?)|((s)?ftp)):\/\/(.)*" min="7" maxlength="10000" name="link_data_input" placeholder="paste your link here" autocomplete="off" required>
-        </div>
-        <div id="tab_message" class="tab_content hide" data-group="userdata">
-          <label for="message_data_input">Your Message</label>
-          <textarea id="message_data_input" maxlength="1500000" name="message_data_input" placeholder="write your message here" rows="4" cols="80" autocomplete="false" required></textarea>
-        </div>
-        <div id="tab_image" class="tab_content hide" data-group="userdata">
-          <img id="image_preview" class="hide fullscreen_img" src="" alt="Image Preview">
-          <label for="image_data_input">Your Image - <span class="size">0</span>/1.5 MB<span class="tune"></span></label>
-          <input id="image_data_input" type="file" name="image_data_input" autocomplete="off" accept="image/*" required>
-        </div>
-        <div id="tab_file" class="tab_content hide" data-group="userdata">
-          <label for="file_data_input">Your File - <span class="size">0</span>/1.5 MB</label>
-          <input id="file_data_input" type="file" name="file_data_input" autocomplete="off" required>
-        </div>
+        <div id="info" class="tab_content">Waiting...</div>
       </div>
       <div id="container_settings" class="space default hide">
         <div id="settings_time" class="tab_group pills solid">
