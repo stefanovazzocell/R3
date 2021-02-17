@@ -19,4 +19,4 @@ const KEY_ROUNDS = 800000;
 */
 
 // The API endpoint
-const API_ENDPOINT = `${window.location.origin}/v1/`;
+const API_ENDPOINT = `https://api.rkt.one/v1/`;
