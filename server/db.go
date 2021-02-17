@@ -12,13 +12,13 @@ import (
 var pool *redis.Pool
 
 // newPool - Create a new DB Pool
-func newPool(hostname string) *redis.Pool {
+func newPool(hostname string, password string) *redis.Pool {
 	log.Println("[DB] Creating new Redis Pool")
 	return &redis.Pool{
 		MaxIdle:   20,
 		MaxActive: 1000,
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", hostname)
+			c, err := redis.DialURL("redis://default:" + password + "@" + hostname + "/0")
 			HandleError(err)
 			return c, err
 		},
@@ -56,7 +56,7 @@ func FindLink(linkReq LinkRequest) (LinkData, error) {
 		// Don't return data
 		return linkData, errors.New("Link Expired")
 	}
-	
+
 	data, err = redis.String(reply[1], err)
 	if err != nil {
 		return linkData, err

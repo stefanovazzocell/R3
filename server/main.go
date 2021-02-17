@@ -7,7 +7,7 @@ import (
 )
 
 // DB + cors + server Settings
-var db_host, db_prefix, cors_allowed, web_port string
+var db_host, db_password, db_prefix, cors_allowed, web_port string
 
 // Rate Limit + Proxy Settings
 var rl_max_req, rl_max_ipr, rl_bigquery, rl_proxy int
@@ -17,6 +17,7 @@ func main() {
 	// Get Flags
 	flag.StringVar(&web_port, "web_port", ":8080", "[App] Web Server Port")
 	flag.StringVar(&db_host, "db_host", "localhost:6379", "[Database] DB host")
+	flag.StringVar(&db_password, "db_password", "", "[Database] DB password")
 	flag.StringVar(&db_prefix, "db_prefix", "rkt:", "[Database] Entries prefix")
 	flag.StringVar(&cors_allowed, "cors_allowed", "http://localhost", "[CORS] Allowed domain(s)")
 	flag.IntVar(&rl_max_req, "rl_max_req", 2048, "[Rate Limit] Max data added in Kb per request")
@@ -30,7 +31,7 @@ func main() {
 	rl_bigquery = rl_bigquery * 1024
 	// Start Server
 	log.Println("Starting Server...")
-	pool = newPool(db_host)
+	pool = newPool(db_host, db_password)
 	router := NewRouter()
 	log.Println("Listening...")
 	log.Fatal(http.ListenAndServe(web_port, router))
