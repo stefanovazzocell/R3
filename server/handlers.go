@@ -123,7 +123,7 @@ func handleGet(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 		return
 	}
 
-	if CheckRequest(linkReq, false) == false {
+	if !CheckRequest(linkReq, false) {
 		RequestError(w)
 		return
 	}
@@ -147,7 +147,7 @@ func handleCreate(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 		return
 	}
 
-	if CheckRequest(linkReq, true) == false {
+	if !CheckRequest(linkReq, true) {
 		RequestError(w)
 		return
 	}
@@ -162,7 +162,7 @@ func handleCreate(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 		ServerError(w)
 		return
 	}
-	if res == false {
+	if !res {
 		ResourceError(w, "Link taken.")
 		return
 	}
@@ -179,7 +179,7 @@ func handleEdit(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 		return
 	}
 
-	if (CheckRequest(linkReq, true) == false) || (len(linkReq.Password) != 88) {
+	if (!CheckRequest(linkReq, true)) || (len(linkReq.Password) != 88) {
 		RequestError(w)
 		return
 	}
@@ -189,7 +189,7 @@ func handleEdit(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 		ServerError(w)
 		return
 	}
-	if res == false {
+	if !res {
 		ResourceError(w, "Wrong password or missing link.")
 		return
 	}
@@ -211,7 +211,7 @@ func handleDelete(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 		ServerError(w)
 		return
 	}
-	if res == false {
+	if !res {
 		ResourceError(w, "Wrong password or missing link.")
 		return
 	}
