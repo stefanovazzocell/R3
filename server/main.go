@@ -32,6 +32,7 @@ func main() {
 	// Start Server
 	log.Println("Starting Server...")
 	pool = newPool(db_host, db_password)
+	go HandleError(DBping())
 	router := NewRouter()
 	log.Println("Listening...")
 	log.Fatal(http.ListenAndServe(web_port, router))

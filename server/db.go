@@ -54,7 +54,7 @@ func FindLink(linkReq LinkRequest) (LinkData, error) {
 	}
 	if hits < 0 {
 		// Don't return data
-		return linkData, errors.New("Link Expired")
+		return linkData, errors.New("link expired")
 	}
 
 	data, err = redis.String(reply[1], err)
@@ -170,4 +170,18 @@ func addHitIP(ip string, hits int) (int, error) {
 	}
 
 	return reply, nil
+}
+
+// ping - Attempt to ping DB
+func DBping() error {
+	// Get a Connection
+	conn := pool.Get()
+	defer conn.Close()
+
+	// Attempt to ping
+	output, err := redis.String(conn.Do("PING"))
+	if err == nil && output != "PONG" {
+		err = errors.New("did not get pong from the server")
+	}
+	return err
 }
