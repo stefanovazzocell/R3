@@ -48,7 +48,7 @@ func RateLimit(r *http.Request, linkReq LinkRequest) bool {
 // CheckPayload - Checks a request for validity
 func CheckRequest(linkReq LinkRequest, checkPayload bool) bool {
 	// ID must be an hash
-	if len(linkReq.ID) != 88 && len(linkReq.ID) != 8 {
+	if len(linkReq.ID) != 8 {
 		return false
 	}
 
