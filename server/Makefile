@@ -4,7 +4,7 @@
 	go run .
 
 build:
-	go build
+	go build -ldflags "-w -s"
 
 clean:
 	go fmt
