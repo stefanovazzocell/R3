@@ -240,49 +240,57 @@ onReady(()=>{
     const hash = window.location.hash.substring(1);
     log('Found a share hash');
     document.getElementById('view_share_id').innerText = hash.substring(0,40) + (hash.length > 40 ? '...' : '');
-    GetLinkUI(hash).then((e)=>{
-      const errorFn = () => {
-        document.getElementById('view_error_message').innerText = 'Unsupported Share';
-        hide('#container_loader');
-        show('#container_error');
-      }
-      if (e) {
-        // Decrypted
-        view_share = e;
-        let stype = '';
-        switch (e.t) {
-          case 'l':
-            stype = 'a link';
-            break;
-          case 't':
-            stype = 'a message';
-            break;
-          case 'i':
-            if (!e.i || !e.i.length) { errorFn(); return; }
-            if (e.i.length > 1) {
-              stype = 'some images';
-            } else stype = 'an image';
-            break;
-          case 'f':
-            if (!e.f || !e.f.length) { errorFn(); return; }
-            if (e.f.length > 1) {
-              stype = 'some files';
-            } else stype = 'a file';
-            break;
-          default:
-            errorFn();
-            return;
+    try {
+      GetLinkUI(hash).then((e)=>{
+        const errorFn = () => {
+          document.getElementById('view_error_message').innerText = 'Unsupported Share';
+          hide('#container_loader');
+          show('#container_error');
         }
-        document.getElementById('view_share_type').innerText = stype;
-        hide('#container_loader');
-        show('#container_view');
-        window.history.replaceState( {} , 'R3', '/' ); // Remove URL from history
-      } else {
-        // Error
-        hide('#container_loader');
-        show('#container_error');
-      }
-    });
+        if (e) {
+          // Decrypted
+          view_share = e;
+          let stype = '';
+          switch (e.t) {
+            case 'l':
+              stype = 'a link';
+              break;
+            case 't':
+              stype = 'a message';
+              break;
+            case 'i':
+              if (!e.i || !e.i.length) { errorFn(); return; }
+              if (e.i.length > 1) {
+                stype = 'some images';
+              } else stype = 'an image';
+              break;
+            case 'f':
+              if (!e.f || !e.f.length) { errorFn(); return; }
+              if (e.f.length > 1) {
+                stype = 'some files';
+              } else stype = 'a file';
+              break;
+            default:
+              errorFn();
+              return;
+          }
+          document.getElementById('view_share_type').innerText = stype;
+          hide('#container_loader');
+          show('#container_view');
+          window.history.replaceState( {} , 'R3', '/' ); // Remove URL from history
+        } else {
+          // Error
+          hide('#container_loader');
+          show('#container_error');
+        }
+      });
+    } catch (error) {
+      console.warn(error);
+      // Error
+      document.getElementById('view_error_message').innerText = 'Share Expired';
+      hide('#container_loader');
+      show('#container_error');
+    }
   } else {
     ui_reset();
   }
