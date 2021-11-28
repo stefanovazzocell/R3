@@ -26,7 +26,24 @@ R3 aims to provide a reasonably secure and private way to share small pieces of 
 
 ## Changes
 
-The current version is v3.0.1
+### Latest (v3.1.0)
+
+- Tweaked encryption: up to 2x more rounds of PBKDF2, simpler hashing, and more (see docs for more details).
+- Better error handling on expired share and network failure.
+- Updated dependencies.
+- [WIP] New Go library to interact with R3 shares. 
+
+### Since v3.0.2
+
+- Added detection of unsupported images.
+- Tweaked CSS file.
+
+### Since v3.0.1
+
+- Improved canvas access detection.
+- Better messaging for unsupported browsers (No JavaScript and no Crypto).
+- Improved image compression algorithm for better compression performance.
+- Fix a but that would cause some compression scenarios to fail.
 
 ### Since v3.0.0
 
