@@ -7,34 +7,18 @@
 * @returns  Promise
 */
 async function SimpleHash(password) {
-  // Prepare
-  const full = await HashString(password, PRE_HASH_ROUNDS);
-  // Take ~ 6 characters (64^6 possibilities)
-  const partial_hash = full.substring(0, 6);
-  // Hash
-  return await HashString(partial_hash, HASH_ROUNDS);
-}
-
-/*
-* HashString(password) - Computes a secure hash using PBKDF2
-*
-* @requires password {String} to be the starting password
-* @requires rounds   {Int} rounds to use for PBKDF2
-* @returns  Promise
-*/
-async function HashString(password, rounds) {
   // Prepare constants
-  const passwordBuffer = (new TextEncoder()).encode(`hashgen:${password}.`);
+  const passwordBuffer = (new TextEncoder()).encode(`hashgen::${password}::salty`);
   const importedKey = await crypto.subtle.importKey('raw', passwordBuffer, 'PBKDF2', false, ['deriveBits']);
 
   const bits = await crypto.subtle.deriveBits({
     name:       'PBKDF2',
     hash:       'SHA-512',
     salt:       HASH_SALT,
-    iterations: rounds
+    iterations: HASH_ROUNDS
   }, importedKey, 512);
 
-  return ToBase64(bits);
+  return ToBase64(bits.slice(0,6));
 }
 
 /*
@@ -46,11 +30,11 @@ async function HashString(password, rounds) {
 */
 async function SimpleKey(password, salt) {
   // Prepare constants
-  const passwordBuffer = (new TextEncoder()).encode(`keygen:${password}.`);
+  const passwordBuffer = (new TextEncoder()).encode(`keyder::${password}::salted`);
   const importedKey = await crypto.subtle.importKey('raw', passwordBuffer, 'PBKDF2', false, ['deriveKey']);
 
   // Get or Generate the salt
-  const saltBuffer = (salt ? FromBase64(salt) : window.crypto.getRandomValues(new Uint8Array(12)));
+  const saltBuffer = (salt ? FromBase64(salt) : window.crypto.getRandomValues(new Uint8Array(32)));
 
   // Derive a key
   const key = await crypto.subtle.deriveKey({

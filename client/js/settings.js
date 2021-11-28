@@ -5,14 +5,12 @@
 */
 
 // The salt to be used when deriving the hash
-const HASH_SALT = new Uint8Array([231,68,163,92,124,82,245,221,98,93,218,109,5,22,130,112,242,31,182,6,237,254,21,135,125,104,73,150,132,40,197,174,68,111,226,211,86,146,124,245,248,153,50,123,78,132,180,89,119,16,228,177,42,19,48,221,192,245,163,23,32,195,139,19]);
+const HASH_SALT = new Uint8Array([82,242,11,190,119,15,58,152,115,230,184,149,107,12,5,37,184,242,159,111,72,180,65,53,104,78,252,123,188,17,71,187,216,128,141,148,126,110,15,113,175,70,216,37,211,247,93,216,210,197,189,100,37,81,113,113,173,8,184,97,225,223,24,69]);
 // The iteration for the key generation the hash
-const HASH_ROUNDS = 500000;
-// The iteration for the key generation pre hash
-const PRE_HASH_ROUNDS = 1000;
+const HASH_ROUNDS = 1000000;
 
 // The iteration for the key generation the encryption key
-const KEY_ROUNDS = 800000;
+const KEY_ROUNDS = 1000000;
 
 /*
 * API
