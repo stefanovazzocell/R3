@@ -79,11 +79,6 @@ func TestEncryptDecrypt(t *testing.T) {
 	if elapsed > time.Second*2 {
 		t.Fatalf("Error encrypting/decrypting, it took %s to encrypt+decrypt", elapsed)
 	}
-
-	go Decrypt("ahD9lMav6S0xYKd6dMuBHE3qf8gyXFNjWw+srckUBC4=Bc90ou4u+8InbnUaUwRTIajr+bEPaGkpBYA7KqYUbYam", "key", pc)
-	x := <-pc
-	fmt.Println(x)
-	fmt.Println(string(x))
 }
 
 func randomBytes(n uint) []byte {
