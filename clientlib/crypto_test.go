@@ -2,15 +2,14 @@ package clientlib
 
 import (
 	"bytes"
-	"fmt"
 	"math/rand"
 	"regexp"
 	"testing"
 	"time"
 )
 
-func TestGenPass(t *testing.T) {
-	pass := GenPass()
+func TestGenID(t *testing.T) {
+	pass := GenID()
 	matched, err := regexp.Match("^([a-zA-Z0-9]{0,3}\\.){3}[a-zA-Z0-9]{0,3}$", []byte(pass))
 
 	if err != nil {
@@ -48,12 +47,39 @@ func TestGenHash(t *testing.T) {
 	}
 }
 
+func TestGenPass(t *testing.T) {
+	var hc chan string = make(chan string, 1)
+	defer close(hc)
+	go GenPass("secret", hc)
+	output := <-hc
+	if output != "+dSrTYRfGzgR/VyoUE2/EwZzBn6tBR9qyrs9XRKiqNd1lfFMI+cjl9TrEBlRbXC4ddsLtD/MOoT/GT/r/76tkQ==" {
+		t.Fatalf("Expected '+dSrTYRfGzgR/VyoUE2/EwZzBn6tBR9qyrs9XRKiqNd1lfFMI+cjl9TrEBlRbXC4ddsLtD/MOoT/GT/r/76tkQ==' for GenPass of 'secret', got '%s'\n", output)
+	}
+
+	var random string = string(randomBytes(20))
+
+	start := time.Now()
+
+	go GenPass(random, hc)
+	output = <-hc
+
+	elapsed := time.Since(start)
+
+	if len(output) != 88 {
+		t.Fatalf("Expected len 88 for GenPass of '%s', got '%s' (len %d)\n", random, output, len(output))
+	}
+
+	if elapsed > time.Second*2 {
+		t.Fatalf("Error encrypting/decrypting, it took %s to GenPass", elapsed)
+	}
+}
+
 func TestEncryptDecrypt(t *testing.T) {
 	key := string(randomBytes(20))
 	data := randomBytes(100)
 
 	var kc chan []byte = make(chan []byte, 1)
-	var sc chan string = make(chan string, 1)
+	var sc chan []byte = make(chan []byte, 1)
 	var dc chan string = make(chan string, 1)
 	var pc chan []byte = make(chan []byte, 1)
 	defer close(kc)
@@ -66,8 +92,8 @@ func TestEncryptDecrypt(t *testing.T) {
 	start := time.Now()
 
 	go KeyDerivation(key, kc, sc)
-	go Encrypt(data, <-kc, dc)
-	go Decrypt((<-sc)+(<-dc), key, pc)
+	go Encrypt(data, kc, sc, dc)
+	go Decrypt(<-dc, key, pc)
 	output = (<-pc)
 
 	elapsed := time.Since(start)

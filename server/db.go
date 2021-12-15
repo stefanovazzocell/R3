@@ -1,179 +1,260 @@
 package main
 
 import (
-	"errors"
+	"crypto/md5"
+	"encoding/base64"
+	"fmt"
 	"log"
-	"strconv"
+	"net"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
+	"github.com/stefanovazzocell/R3/shared"
 )
 
 var pool *redis.Pool
 
-// newPool - Create a new DB Pool
-func newPool(hostname string, password string) *redis.Pool {
+func newPool(redisUri string) *redis.Pool {
 	log.Println("[DB] Creating new Redis Pool")
 	return &redis.Pool{
 		MaxIdle:   20,
 		MaxActive: 1000,
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.DialURL("redis://default:" + password + "@" + hostname + "/0")
-			HandleError(err)
+			c, err := redis.DialURL(redisUri)
+			if err != nil {
+				panic(err)
+			}
 			return c, err
 		},
 	}
 }
 
-// FindLink - Attempt to get a link
-func FindLink(linkReq LinkRequest) (LinkData, error) {
-	var linkData LinkData
-	var data string
-	var hits int
+func redisGetShare(httpReq *http.Request, req shared.ViewRequest) (shared.APIResponseData, error) {
+	var (
+		manage   bool                   = (len(req.Password) == 88)
+		response shared.APIResponseData = shared.APIResponseData{}
+	)
 
 	// Get a Connection
 	conn := pool.Get()
 	defer conn.Close()
 
-	// Try to get Data
-	conn.Send("MULTI")
-	conn.Send("HINCRBY", db_prefix+"link:"+linkReq.ID, "hits", "-1")
-	conn.Send("HGET", db_prefix+"link:"+linkReq.ID, "data")
-	reply, err := redis.Values(conn.Do("EXEC"))
+	// Rate Limit
+	err := redisHit(conn, httpReq, 0)
 	if err != nil {
-		return linkData, err
+		return response, err
 	}
-	hits, err = redis.Int(reply[0], err)
 
-	// Deal with expired links
-	if hits <= 0 {
-		// Attempt to delete and cleanup
-		if deleteLink(linkReq) != nil {
-			log.Println("Error deleting link")
+	// Try to get data
+	conn.Send("MULTI")
+	if manage {
+		conn.Send("GET", DatabasePrefix+":spass:"+req.ID)
+		conn.Send("TTL", DatabasePrefix+":sdata:"+req.ID)
+		conn.Send("GET", DatabasePrefix+":shits:"+req.ID)
+		rrv, err := redis.Values(conn.Do("EXEC"))
+		if err != nil && err != redis.ErrNil {
+			log.Printf("Error while retriving share data: %v\n", err)
+			return response, ErrorGeneric
+		}
+		if err == redis.ErrNil {
+			return response, ErrorShareExpOrPass
+		}
+		// Check Password
+		pass, err := redis.String(rrv[0], err)
+		if err != nil && err != redis.ErrNil {
+			log.Printf("Error while retriving share data password: %v\n", err)
+			return response, ErrorGeneric
+		}
+		if pass != req.Password {
+			return response, ErrorSharePassword
+		}
+		// Get Metadata
+		ttl, err := redis.Int(rrv[1], err)
+		if err != nil && err != redis.ErrNil {
+			log.Printf("Error while retriving share data ttl: %v\n", err)
+			return response, ErrorGeneric
+		}
+		hits, err := redis.Int(rrv[2], err)
+		if err != nil && err != redis.ErrNil {
+			log.Printf("Error while retriving share data hits: %v\n", err)
+			return response, ErrorGeneric
+		}
+		response.Success = true
+		response.Err = ""
+		response.TTL = ttl
+		response.Hits = hits
+		return response, nil
+	} else {
+		conn.Send("INCRBY", DatabasePrefix+":shits:"+req.ID, -1)
+		conn.Send("GET", DatabasePrefix+":sdata:"+req.ID)
+		rrv, err := redis.Values(conn.Do("EXEC"))
+		if err != nil && err != redis.ErrNil {
+			log.Printf("Error while retriving share data: %v\n", err)
+			return response, ErrorGeneric
+		}
+		if err == redis.ErrNil {
+			return response, ErrorShareExpired
+		}
+		// Check hits
+		hits, err := redis.Int(rrv[0], err)
+		if err != nil && err != redis.ErrNil {
+			log.Printf("Error while checking share data hits: %v\n", err)
+			return response, ErrorGeneric
+		}
+		if hits < 0 {
+			return response, ErrorShareExpired
+		}
+		// Get data
+		data, err := redis.Bytes(rrv[1], err)
+		if err != nil && err != redis.ErrNil {
+			log.Printf("Error while parsing share data: %v\n", err)
+			return response, ErrorGeneric
+		}
+		response.Success = true
+		response.Err = ""
+		response.Data = base64.StdEncoding.EncodeToString(data)
+		// Expire share
+		if hits <= 0 {
+			conn.Send("MULTI")
+			conn.Send("DEL", DatabasePrefix+":sdata:"+req.ID)
+			conn.Send("DEL", DatabasePrefix+":spass:"+req.ID)
+			conn.Send("DEL", DatabasePrefix+":shits:"+req.ID)
+			conn.Do("EXEC")
+		}
+		return response, nil
+	}
+}
+
+func redisEditShare(httpReq *http.Request, req shared.EditRequest, dataDecoded []byte) error {
+	editing := (req.Password != "")
+
+	// Get a Connection
+	conn := pool.Get()
+	defer conn.Close()
+
+	// Check if share exists
+	data, err := redis.Bytes(conn.Do("GET", DatabasePrefix+":sdata:"+req.ID))
+	if err != nil && err != redis.ErrNil {
+		log.Printf("Error while checking if share exists: %v\n", err)
+		return ErrorGeneric
+	}
+	shareExists := (len(data) > 0)
+
+	// If editing/deleting it must exist, otherwise it shouldn't
+	if editing && !shareExists {
+		return ErrorShareExpired
+	}
+	if len(req.Password) == 0 && shareExists {
+		return ErrorShareExists
+	}
+
+	// Rate limit check
+	if editing && !req.Delete || editing {
+		cost := len(dataDecoded) / 1000
+		if cost < 1 {
+			cost = 1
+		}
+		err := redisHit(conn, httpReq, cost)
+		if err != nil {
+			return err
 		}
 	}
-	if hits < 0 {
-		// Don't return data
-		return linkData, errors.New("link expired")
-	}
 
-	data, err = redis.String(reply[1], err)
-	if err != nil {
-		return linkData, err
-	}
-
-	linkData.Data = data
-
-	return linkData, nil
-}
-
-// SetLink - Attempt to create a link
-func SetLink(linkReq LinkRequest) (bool, error) {
-	// Get a Connection
-	conn := pool.Get()
-	defer conn.Close()
-
-	// Attempt to create link
-	reply, err := redis.Int(conn.Do("HSETNX", db_prefix+"link:"+linkReq.ID, "data", linkReq.Payload.Data))
-	if err != nil {
-		HandleError(err)
-		return false, err
-	}
-	if reply != 1 {
-		// Link Taken
-		return false, nil
-	}
-
-	// Complete Creation
-	conn.Send("MULTI")
-	conn.Send("EXPIRE", db_prefix+"link:"+linkReq.ID, linkReq.Payload.TTL)
-	conn.Send("HSET", db_prefix+"link:"+linkReq.ID, "hits", linkReq.Payload.Hits, "edit", linkReq.Payload.Edit)
-	_, err = conn.Do("EXEC")
-	if err != nil {
-		// Attempt a cleanup
-		_, _ = conn.Do("DEL", db_prefix+"link:"+linkReq.ID)
-		HandleError(err)
-		return false, err
-	}
-
-	return true, nil
-}
-
-// deleteLink - Attempt to delete a link
-func deleteLink(linkReq LinkRequest) error {
-	// Get a Connection
-	conn := pool.Get()
-	defer conn.Close()
-
-	// Attempt to delete the link
-	_, err := conn.Do("DEL", db_prefix+"link:"+linkReq.ID)
-	return err
-}
-
-// editLink - Attempt to edit or delete a link
-func editLink(linkReq LinkRequest, delete bool) (bool, error) {
-	// Get a Connection
-	conn := pool.Get()
-	defer conn.Close()
-
-	// Attempt to check the password
-	conn.Send("WATCH", db_prefix+"link:"+linkReq.ID)
-	reply, err := redis.String(conn.Do("HGET", db_prefix+"link:"+linkReq.ID, "edit"))
-	if err != nil {
-		HandleError(err)
-		return false, err
-	}
-	if reply == "" || reply != linkReq.Password {
-		// Invalid Password or not editable
-		return false, nil
-	}
-
-	if delete {
-		// Complete Creation
-		_, err = conn.Do("UNWATCH")
-		if err != nil {
-			return false, nil
+	// If editing, check that the password matches
+	if editing {
+		data, err := redis.String(conn.Do("GET", DatabasePrefix+":spass:"+req.ID))
+		if err != nil && err != redis.ErrNil {
+			log.Printf("Error while checking password match: %v\n", err)
+			return ErrorGeneric
 		}
-		err = deleteLink(linkReq)
-		if err != nil {
-			return false, nil
+		if err == redis.ErrNil || data == "" {
+			return ErrorShareNotEditable
+		} else if data != req.Password {
+			return ErrorSharePassword
+		}
+	}
+
+	// Either delete or save
+	if editing && req.Delete {
+		conn.Send("MULTI")
+		conn.Send("DEL", DatabasePrefix+":sdata:"+req.ID)
+		conn.Send("DEL", DatabasePrefix+":spass:"+req.ID)
+		conn.Send("DEL", DatabasePrefix+":shits:"+req.ID)
+		_, err := conn.Do("EXEC")
+		if err != nil && err != redis.ErrNil {
+			log.Printf("Error while deleting: %v\n", err)
+			return ErrorGeneric
 		}
 	} else {
-		// Complete Creation
 		conn.Send("MULTI")
-		conn.Send("EXPIRE", db_prefix+"link:"+linkReq.ID, linkReq.Payload.TTL)
-		conn.Send("HSET", db_prefix+"link:"+linkReq.ID, "data", linkReq.Payload.Data, "hits", linkReq.Payload.Hits, "edit", linkReq.Payload.Edit)
-		_, err = conn.Do("EXEC")
+		// Set Data
+		conn.Send("SETEX", DatabasePrefix+":sdata:"+req.ID, req.Payload.TTL, dataDecoded)
+		// Either set or clear edit password
+		if len(req.Payload.Edit) == 88 {
+			conn.Send("SETEX", DatabasePrefix+":spass:"+req.ID, req.Payload.TTL, req.Payload.Edit)
+		} else {
+			conn.Send("DEL", DatabasePrefix+":spass:"+req.ID)
+		}
+		// Set hits limit
+		conn.Send("SETEX", DatabasePrefix+":shits:"+req.ID, req.Payload.TTL, req.Payload.Hits)
+		_, err := conn.Do("EXEC")
 		if err != nil {
-			return false, nil
+			log.Printf("Error while creating/editing: %v\n", err)
+			return ErrorGeneric
 		}
 	}
-
-	return true, nil
+	return nil
 }
 
-// addHitIP - Adds a hit to an IP
-func addHitIP(ip string, hits int) (int, error) {
-	// Get a Connection
-	conn := pool.Get()
-	defer conn.Close()
-
-	var id string = db_prefix + "ip:" + ip + ":" + strconv.Itoa(time.Now().Hour())
-
-	// Attempt to register hit
-	reply, err := redis.Int(conn.Do("INCRBY", id, hits))
-	_, _ = conn.Do("EXPIRE", id, 3600)
-
-	if err != nil {
-		HandleError(err)
-		return 0, err
+func redisHit(conn redis.Conn, r *http.Request, data int) error {
+	// Note: if data == 0, it will consider this a request
+	var (
+		ip     string = ""
+		id     string
+		err    error
+		count  int
+		isData bool = (data != 0)
+	)
+	// Get IP
+	if HasProxy {
+		ip = r.Header.Get("CF-Connecting-IP")
+		if ip == "" {
+			ip = strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
+		}
 	}
-
-	return reply, nil
+	if !HasProxy || ip == "" {
+		ip, _, _ = net.SplitHostPort(r.RemoteAddr)
+	}
+	hash := md5.Sum([]byte(fmt.Sprintf("%s%d", ip, time.Now().Hour())))
+	id = base64.URLEncoding.EncodeToString(hash[0:2])
+	// Count
+	if isData {
+		count, err = redis.Int(conn.Do("INCRBY", DatabasePrefix+":datacap:"+id, data))
+		conn.Do("EXPIRE", DatabasePrefix+":datacap:"+id, 3600)
+	} else {
+		count, err = redis.Int(conn.Do("INCRBY", DatabasePrefix+":queriescap:"+id, 1))
+		conn.Do("EXPIRE", DatabasePrefix+":queriescap:"+id, 3600)
+	}
+	if err != nil {
+		log.Printf("Error while setting ratelimit: %v\n", err)
+		return ErrorGeneric
+	}
+	// Check
+	if isData {
+		if count > DataCap {
+			return ErrorRateLimit
+		}
+	} else {
+		if count > QueriesCap {
+			return ErrorRateLimit
+		}
+	}
+	return nil
 }
 
-// ping - Attempt to ping DB
-func DBping() error {
+func redisPing() error {
 	// Get a Connection
 	conn := pool.Get()
 	defer conn.Close()
@@ -181,7 +262,10 @@ func DBping() error {
 	// Attempt to ping
 	output, err := redis.String(conn.Do("PING"))
 	if err == nil && output != "PONG" {
-		err = errors.New("did not get pong from the server")
+		err = ErrorPing
+	}
+	if err == nil && output == "PONG" {
+		log.Println("[DB] Received PONG")
 	}
 	return err
 }

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://api.rkt.one; script-src 'self'; img-src 'self' data:; object-src 'none'; require-trusted-types-for 'script';"> -->
+    <meta name="theme-color" content="#28acf6">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#28acf6">
+    <link rel="apple-touch-icon" href="/res/icon_192.png">
+    <link rel="manifest" href="/manifest.json">
+    <title>Rocket</title>
+    <meta name="description" content="File sharing with encryption">
+    <link rel="stylesheet" href="/res/style.css">
+  </head>
+  <body>
+    <div id="header">
+      <a href="/">Rocket</a>
+    </div>
+    <div id="app">
+      <div id="create">
+        <div id="omni">
+          <div id="sp" class="pill"></div>
+          <div id="storagep" class="pill"></div>
+          <div id="clearp" class="pill">Clear</div>
+          <textarea id="stext" placeholder="Start typing or drop a file"></textarea>
+          <div id="filesbox" class="hide">
+            <div id="samplef"></div>
+          </div>
+          <input type="file" class="hide" id="sfiles" multiple>
+        </div>
+        <div id="opt">
+          <label for="sid">Share ID (<a href="#" id="rID">random</a>)</label>
+          <div><input type="text" pattern="[A-Za-z0-9-._~:/?#\[\]@!\$&'\(\)\*\+,;=]{3,}" id="sid" name="sid" required></div>
+          <label for="sttl">Expiration timer</label>
+          <div><select id="sttl" name="sttl" required>
+            <option value="600">10min</option>
+            <option value="3600" selected>1h</option>
+            <option class="bq" value="43200">12h</option>
+            <option class="bq" value="86400">1d</option>
+            <option class="bq" value="172800">2d</option>
+            <option class="bq" value="604800">1w</option>
+          </select></div>
+          <label for="sviews">Views limit</label>
+          <div><select id="sviews" name="sviews" required>
+            <option value="1">1</option>
+            <option value="10" selected>10</option>
+            <option value="1000">1K</option>
+            <option value="10000">10K</option>
+            <option value="1000000">1M</option>
+          </select></div>
+          <label for="sepass">Share admin password (optional, <a href="#" id="rPass">random</a>)</label>
+          <div><input type="text" id="sepass" name="sepass"></div>
+          <div><button id="s" disabled>Share</button></div>
+        </div>
+      </div>
+      <div id="view" class="hide">
+        <div>Someone has shared this with you:</div>
+        <div id="rurl" class="hide">
+          <input type="rurld" id="rurld" readonly>
+          <button class="copy" data-t="rurld">Copy</button>
+        </div>
+        <div id="rtext" class="hide"></div>
+        <div id="rfiles" class="hide"></div>
+      </div>
+    </div>
+    <div id="footer">
+      <a href="https://stefanovazzocell.github.io/R3/docs/privacy" target="_blank">Privacy</a> &#8226; <a href="https://stefanovazzocell.github.io/R3/docs/terms" target="_blank">Terms</a> &#8226; <a href="https://github.com/stefanovazzocell/R3/releases" target="_blank">Changelog</a>
+    </div>
+    <div id="sready">
+      <div id="sharing"></div>
+      <div id="sd" class="hide">
+        <input type="url" id="surl" readonly>
+        <button class="copy" data-t="surl">Copy</button>
+      </div>
+    </div>
+    <div id="alerts">
+      <div id="sample"><div class="msg"></div><small>Tap to dismiss</small></div>
+    </div>
+    <script src="/res/main.js" charset="utf-8"></script>
+  </body>
+</html>
