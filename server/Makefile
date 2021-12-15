@@ -1,6 +1,8 @@
-.PHONY: build clean install commit
+.PHONY: build clean test
 
 @:
+	go fmt
+	go clean
 	go run .
 
 build:
@@ -10,12 +12,8 @@ clean:
 	go fmt
 	go clean
 
-install:
-	go get github.com/julienschmidt/httprouter
-	go get github.com/garyburd/redigo/redis
-
-commit:
+test:
 	go fmt
 	go clean
-	git add .
-	git commit
+	go test
+	go clean

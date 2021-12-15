@@ -7,13 +7,13 @@ import (
 )
 
 // NewRouter - Create a Router object
-func NewRouter() *mux.Router {
+func newRouter() *mux.Router {
 	router := mux.New()
 
 	router.GlobalOPTIONS = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := w.Header()
 		header.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		header.Set("Access-Control-Allow-Origin", cors_allowed)
+		header.Set("Access-Control-Allow-Origin", CORSorigin)
 
 		w.WriteHeader(http.StatusNoContent)
 	})

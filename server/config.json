@@ -1,0 +1,9 @@
+{
+    "ListeningAddr": ":8080",
+    "CORSorigin": "http://localhost",
+    "RedisURI": "redis://default:@localhost:6379/0",
+    "DatabasePrefix": "database_prefix",
+    "DataCap": 102400,
+    "QueriesCap": 1000000,
+    "HasProxy": false
+}

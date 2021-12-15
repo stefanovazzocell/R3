@@ -1,46 +1,54 @@
 package main
 
 import (
-	"flag"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/stefanovazzocell/R3/shared"
 )
 
-// DB + cors + server Settings
-var db_host, db_password, db_prefix, cors_allowed, web_port string
+// Flags
+var ListeningAddr, CORSorigin, RedisURI, DatabasePrefix string
+var DataCap, QueriesCap int
+var HasProxy bool
 
-// Rate Limit + Proxy Settings
-var rl_max_req, rl_max_ipr, rl_bigquery, rl_proxy int
-
-// main - Start the server
-func main() {
-	// Get Flags
-	flag.StringVar(&web_port, "web_port", ":8080", "[App] Web Server Port")
-	flag.StringVar(&db_host, "db_host", "localhost:6379", "[Database] DB host")
-	flag.StringVar(&db_password, "db_password", "", "[Database] DB password")
-	flag.StringVar(&db_prefix, "db_prefix", "rkt:", "[Database] Entries prefix")
-	flag.StringVar(&cors_allowed, "cors_allowed", "http://localhost", "[CORS] Allowed domain(s)")
-	flag.IntVar(&rl_max_req, "rl_max_req", 2048, "[Rate Limit] Max data added in Kb per request")
-	flag.IntVar(&rl_max_ipr, "rl_max_ipr", 10240, "[Rate Limit] Max data added in Kb per IP block every 10 minutes")
-	flag.IntVar(&rl_bigquery, "rl_bigquery", 512, "[Rate Limit] Data added in Kb for query to be considered big (limit to 10 min, penalty)")
-	flag.IntVar(&rl_proxy, "rl_proxy", -1, "[Rate Limit] -1 No Proxy, 1 Trust Proxy, 2 Trust CloudFlare")
-	flag.Parse()
-	// Prep Flags
-	rl_max_req = rl_max_req * 1024
-	rl_max_ipr = rl_max_ipr * 1024
-	rl_bigquery = rl_bigquery * 1024
-	// Start Server
-	log.Println("Starting Server...")
-	pool = newPool(db_host, db_password)
-	go HandleError(DBping())
-	router := NewRouter()
-	log.Println("Listening...")
-	log.Fatal(http.ListenAndServe(web_port, router))
-}
-
-// HandleError - Handles unexpected errors
-func HandleError(err error) {
+func init() {
+	// Read config
+	var config shared.Config
+	jsonFile, err := os.Open("config.json")
 	if err != nil {
 		panic(err)
 	}
+	defer jsonFile.Close()
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal(byteValue, &config)
+	if err != nil {
+		panic(err)
+	}
+	ListeningAddr = config.ListeningAddr
+	CORSorigin = config.CORSorigin
+	RedisURI = config.RedisURI
+	DatabasePrefix = config.DatabasePrefix
+	DataCap = config.DataCap
+	QueriesCap = config.QueriesCap
+	HasProxy = config.HasProxy
+}
+
+func main() {
+	log.Println("Starting Server...")
+	pool = newPool(RedisURI)
+	defer pool.Close()
+	err := redisPing()
+	if err != nil {
+		panic(err)
+	}
+	router := newRouter()
+	log.Println("Listening...")
+	log.Fatal(http.ListenAndServe(ListeningAddr, router))
 }

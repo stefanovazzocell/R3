@@ -17,39 +17,15 @@ type Routes []Route
 
 var routes = Routes{
 	Route{
-		"Index",
-		"GET",
-		"/",
-		handleIndex,
-	},
-	Route{
-		"Server Status",
-		"GET",
-		"/status",
-		handleStatus,
-	},
-	Route{
-		"LinkShow",
+		"Create/modify/delete a Share",
 		"POST",
-		"/v1/link",
-		handleGet,
-	},
-	Route{
-		"LinkCreate",
-		"POST",
-		"/v1/links",
-		handleCreate,
-	},
-	Route{
-		"LinkEdit",
-		"PUT",
-		"/v1/link",
+		"/v2/edit",
 		handleEdit,
 	},
 	Route{
-		"LinkDelete",
-		"DELETE",
-		"/v1/link",
-		handleDelete,
+		"Read a Share",
+		"POST",
+		"/v2/get",
+		handleGet,
 	},
 }
