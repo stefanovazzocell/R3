@@ -37,6 +37,7 @@ Rocket aims to provide a reasonably secure and private way to share small pieces
 - **Go client**: A simple client written in Go to create shares without the WebUI.
 - **Rewritten Server**: Rewritten and improved server code, fixed bugs, moved some functions to a share library, improved errors logging, and more.
 - **Rewritten JS client**: The new JS client has been substantially rewritten and the site is now much more robust to network/server errors.
+- **Tests**: Added tests for the server and client library.
 
 ### v3.1.0
 
