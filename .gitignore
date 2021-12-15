@@ -14,3 +14,15 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 server/server
+client/client
+www/favicon.ico
+www/index.html
+www/manifest.json
+www/robots.txt
+www/security.txt
+www/res/icon_192.png
+www/res/icon_512.png
+www/res/main.js
+www/res/icon.svg
+www/res/main.js.map
+www/res/style.css

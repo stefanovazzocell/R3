@@ -24,7 +24,7 @@ build:
 	@echo "Compressing files [CSS]..."
 	@csso res/style.css > ../www/res/style.css
 	@echo "Compressing files [JS]..."
-	@terser res/main.js -m -c --toplevel --mangle-props --name-cache ../www/res/main.js.map > ../www/res/main.js
+	@terser res/main.js -m -c --toplevel --name-cache ../www/res/main.js.map > ../www/res/main.js
 	@echo "Compressing files [HTML]..."
 	@html-minifier --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype --collapse-boolean-attributes index.html > ../www/index.html
 	@echo "Starting server..."
