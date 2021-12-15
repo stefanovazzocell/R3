@@ -1,0 +1,303 @@
+:root {
+  /* Monokai Theme */
+	--primary: #e53265;
+  --alert: #f5d922;
+	--alert_hover: #fae039;
+	--alert_active: #ffe852;
+	--alert_text: #000;
+  --pill: #2fd6b5;
+	--pill_hover: #32e5c2;
+	--pill_text: black;
+  --btn: #e53265;
+	--btn_hover: #f04d7a;
+	--btn_active: #f5678f;
+	--btn_text: #fff;
+  --btn_secondary: #28acf6;
+	--btn_secondary_hover: #40b5f6;
+	--btn_secondary_active: #59bef6;
+	--btn_secondary_text: #000;
+  --text: #fff;
+	--text_weak: #979bb0;
+  --input: #454a61;
+	--input_hover: #575c75;
+	--input_invalid: #f5680a;
+  --bg: #171926;
+	--bg_1: #1e2130;
+	--bg_2: #25283a;
+}
+
+body {
+  margin: 0;
+  width: 100vw;
+  min-width: 325px;
+  min-height: 100vh;  
+  font-family: Helvetica, sans-serif;
+  text-align: center;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--text);
+}
+a {
+  color: var(--btn_secondary);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--btn_secondary_hover);
+}
+a:active {
+  color: var(--btn_secondary_active);
+}
+small {
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 0.6em;
+}
+
+#header {
+  height: 50px;
+  width: 100%;
+  line-height: 50px;
+  font-size: 1.3em;
+  background: var(--bg_2);
+  font-weight: bold;
+}
+#app {
+  min-height: calc(100vh - 110px);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+  text-align: left;
+}
+#footer {
+  height: 40px;
+  width: 100%;
+  line-height: 40px;
+  background: var(--bg_2);
+}
+#alerts {
+  display: grid;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+#alerts > div {
+  margin: 5px auto;
+  padding: 5px 10px;
+  width: 80%;
+  min-width: 290px;
+  max-width: 1000px;
+  background: var(--alert);
+  color: var(--alert_text);
+  font-size: 1.1em;
+  border-radius: 10px;
+  cursor: pointer;
+}
+#alerts > div:hover {
+  background: var(--alert_hover);
+}
+#alerts > div:active {
+  background: var(--alert_active);
+}
+#alerts > div > .msg {
+  line-height: 30px;
+}
+
+#create, #view {
+  width: 90%;
+  max-width: 800px;
+  background: var(--bg_1);
+  border-radius: 5px;
+  overflow: hidden;
+}
+#create {
+  display: flex;
+  flex-direction: row;
+}
+#create > div {
+  min-height: 250px;
+  min-width: 300px;
+  width: 50%;
+}
+#omni {
+  position: relative;
+  background: var(--bg_2);
+  border-radius: 5px;
+}
+textarea, #filesbox {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  width: calc(100% - 40px);
+  height: calc(100% - 74px);
+  border: none;
+  margin: 0;
+  padding: 15px 20px;
+  resize: none;
+  outline: none !important;
+  background: transparent;
+}
+textarea {
+  font-size: 1.2em;
+  color: var(--text);
+}
+#filesbox {
+  cursor: pointer;
+  overflow-y: auto;
+}
+#filesbox > div {
+  width: calc(100% - 20px);
+  height: 35px;
+  line-height: 35px;
+  border-radius: 3px;
+  padding: 0 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--input);
+}
+#opt > div {
+  display: block;
+  margin: 5px auto;
+  width: 90%;
+  border-radius: 2px;
+  overflow: hidden;
+}
+#opt > label {
+  display: block;
+  margin: 10px auto 0 auto;
+  width: 90%;
+  border-radius: 2px;
+  overflow: hidden;
+}
+#sid {
+  font-family: monospace;
+  font-size: 1.3em;
+}
+body.shareurl > div:not(#sready):not(#alerts) {
+  filter: blur(5px);
+}
+body.shareurl > #sready {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  backdrop-filter: blur(15px);
+}
+body.shareurl > #sready > div {
+  max-width: 100%;
+  width: 320px;
+  padding: 20px 20px;
+  background: var(--bg_2);
+  border: 1px solid var(--input_invalid);
+  border-radius: 5px;
+}
+#sharing {
+  cursor: progress;
+}
+
+.pill {
+  margin: 8px;
+  padding: 0 10px;
+  height: 28px;
+  line-height: 28px;
+  font-size: 0.8em;
+  font-weight: bold;
+  display: inline-block;
+  border-radius: 14px;
+  background: var(--pill);
+  color: var(--pill_text);
+}
+.pill:not(:first-of-type) {
+  margin-left: 0;
+}
+.pill:hover {
+  background: var(--pill_hover);
+}
+#clearp {
+  float: right;
+  cursor: pointer;
+}
+#view {
+  padding: 15px 20px;
+  width: 80%;
+  max-width: 500px;
+}
+#view > :first-child {
+  padding-bottom: 20px;
+  color: var(--primary);
+}
+
+input, select, button, #rfiles>a {
+  display: block;
+  margin: none;
+  width: calc(100% - 22px);
+  border: 1px solid var(--input);
+  padding: 5px 10px;
+  outline: none !important;
+  font-size: 1.1em;
+  background: transparent;
+  color: var(--text);
+}
+option {
+  background: var(--bg);
+}
+select, button {
+  width: 100%;
+}
+button, #rfiles>a {
+  height: 35px;
+  line-height: 25px;
+  margin: 15px 0;
+  border: none;
+  background: var(--btn);
+  color: var(--btn_text);
+  border-radius: 5px;
+  cursor: pointer;
+}
+#rfiles>a {
+  height: 30px;
+  line-height: 30px;
+}
+input:hover, select:hover, option:hover {
+  border-color: var(--input_hover);
+}
+button:hover, #rfiles>a {
+  background: var(--btn_hover);
+}
+input:invalid {
+  border-color: var(--input_invalid);
+}
+button:active, #rfiles>a {
+  background: var(--btn_active);
+}
+button:disabled {
+  background: transparent;
+  border: 1px solid var(--input_invalid);
+  cursor: not-allowed;
+}
+
+#sample, #samplef, .hide {
+  display: none !important;
+}
+#alerts > div, .pill, #filesbox, #sharing {
+  user-select: none;
+}
+
+@media only screen and (max-width: 800px) {
+  #create {
+    flex-direction: column;
+    min-width: 310px;
+    width: 90%;
+    max-width: 450px;
+  }
+  #create > div {
+    width: 100%;
+  }
+}
