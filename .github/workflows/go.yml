@@ -1,0 +1,31 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Prepare server
+      run: cd server; go get ./...
+
+    - name: Prepare clientlib
+      run: cd clientlib; go get ./...
+
+    - name: Test server
+      run: go test -v ./...
+
+    - name: clientlib
+      run: go test -v ./...
