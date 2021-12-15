@@ -24,7 +24,7 @@ We try to generate a reasonably secure random Share ID but if the user modifies 
 
 ### Unauthorized backdoor
 
-If this service of its servers get compromised we cannot guarantee the security of the encryption (or encryption at all). We do our best to protect our service against such compromise, but if we or any of our service providers gets hacked we cannot guarantee anything.
+If this service of its servers get compromised we cannot guarantee the security of the encryption (or encryption at all). We do our best to protect our service against such compromise, but if we or any of our service providers gets hacked we cannot guarantee anything. If you're concerned about such a compromise, consider using our Go client.
 
 ## What R3 does protect you from
 
