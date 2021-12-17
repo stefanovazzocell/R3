@@ -40,6 +40,8 @@ body {
 a {
   color: var(--btn_secondary);
   text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 a:hover {
   color: var(--btn_secondary_hover);
