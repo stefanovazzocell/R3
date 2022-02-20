@@ -9,6 +9,7 @@ clean:
 	@cd shared && make clean
 	@cd server && make clean
 	@cd client && make clean
+	@cd clientgui && make clean
 	@cd clientwww && make clean
 
 test:
