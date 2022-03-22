@@ -3,7 +3,7 @@
 // ==========
 // Settings
 
-const API_ENDPOINT = "https://api.rkt.one/v2/";
+const API_ENDPOINT = "https://api.rkt.one:8443/v2/";
 
 // ==========
 // API
