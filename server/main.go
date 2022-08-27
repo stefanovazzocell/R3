@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/stefanovazzocell/R3/shared"
 )
@@ -48,7 +49,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	router := newRouter()
+	httpServer := &http.Server{
+		Addr:         ListeningAddr,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		Handler:      newRouter(),
+	}
 	log.Println("Listening...")
-	log.Fatal(http.ListenAndServe(ListeningAddr, router))
+	log.Fatal(httpServer.ListenAndServe())
 }
